@@ -1,0 +1,16 @@
+a single page application : a map of your neighborhood
+functionality: highlighted locations, third-party data about those locations and contents
+
+Requirement:
+1. Use knockout - handle the list, filter and anything that changes state, except map api
+2. asynchronously and error handling
+3. map api only called once
+4. at least 5 locations displayed by markers, shown by default when loaded
+5. list review of these locations
+6. filter option - an input field (text or dropdown menu) to fiter list and markers, and update accordingly
+7. use third-party APIs
+8. animate markers
+9. open infowindow when a location is selected from list or marker is selected
+10. intuitive interface (details not written here)
+11. mobile responsive (hamburger menu)
+
