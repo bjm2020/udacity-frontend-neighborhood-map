@@ -1,15 +1,26 @@
 var viewModel = function() {
-  this.locations = ko.observableArray([
-    {lat: 37.446443, lng: -122.160893, name: 'Burma Ruby Burmese Cuisine', address: '326 University Ave, Palo Alto, CA'},
-    {lat: 37.445495, lng: -122.161030, name: 'Sharetea Palo Alto', address: '540 Bryant St, Palo Alto, CA'},
-    {lat: 37.447904, lng: -122.159577, name: 'Blue Bottle Coffee', address: 'HanaHaus at New Varsity, 456 University Ave, Palo Alto, CA'},
-    {lat: 37.445825, lng: -122.162137, name: "Oren's Hummus Shop", address: '261 University Ave, Palo Alto, CA'},
-    {lat: 37.445288, lng: -122.161367, name: 'Nola - Palo Alto', address: '535 Ramona St, Palo Alto, CA'}
-    ]);
-};
+  var self = this;
+  this.locations = ko.observableArray();
+  neighborhood.locations.forEach(function(location) {
+    self.locations.push(location);
+  });
 
-var model = new viewModel();
-ko.applyBindings(model);
+  this.locationTypes = ko.observableArray();
+  neighborhood.locationTypes.forEach(function(type) {
+    self.locationTypes.push(type);
+  });
+
+  this.filteredLocations = this.locations;
+
+  this.filterLocations = function(locationType) {
+    self.filteredLocations.removeAll();
+    neighborhood.locations.forEach(function(location) {
+      if (location.type === locationType) {
+        self.filteredLocations.push(location);
+      }
+    });
+  };
+};
 
 var initMap = function() {
   // Constructor creates a new map - only center and zoom are required.
@@ -17,11 +28,71 @@ var initMap = function() {
     center: {lat: 37.446062, lng: -122.160155},
     zoom: 15
   });
-  // TODO: create marker arrays;
-  var tribeca = {lat: 37.446062, lng: -122.160155};
-  var marker = new google.maps.Marker({
-    position: tribeca,
-    map: map,
-    title: 'First Marker!'
+
+  // create markers;
+  var largeInfowindow = new google.maps.InfoWindow();
+  var bounds = new google.maps.LatLngBounds();
+  var markers = [];
+  var images = {
+    Restaurant: {
+      url: 'images/purple.png',
+      // scaledSize: new google.maps.Size(30, 30)
+    },
+    Coffee: {url: 'images/blue.png'},
+    Shopping: {url: 'images/red.png'},
+    Transportation: {url: 'images/green.png'}
+  };
+
+  neighborhood.locations.forEach(function(location, i) {
+    // Create a marker per location, and put into markers array.
+    var marker = new google.maps.Marker({
+       map: map,
+       position: location.location,
+       title: location.title,
+       animation: google.maps.Animation.DROP,
+       icon: images[location.type],
+       id: i
+    });
+    // Push the marker to our array of markers.
+    markers.push(marker);
+    // Create an onclick event to open an infowindow at each marker.
+    marker.addListener('click', function() {
+      populateInfoWindow(this, largeInfowindow);
+    });
+    bounds.extend(marker.position);
   });
+
+  // pop infowindow with click on list item
+  $(".loc-list").click(function() {
+    var id = $(this).index();
+    populateInfoWindow(markers[id], largeInfowindow);
+  });
+
+  // set markers upon filtering 
+  $(".loc-type").click(function(event) {
+    var id = $(this).index();
+    var locationType = neighborhood.locationTypes[id];
+    markers.forEach(function(marker, i) {
+      marker.setMap(map);
+      if (neighborhood.locations[i].type != locationType) {
+        marker.setMap(null);
+      }
+    });
+  });
+
+  function populateInfoWindow(marker, infowindow) {
+    // Check to make sure the infowindow is not already opened on this marker.
+    if (infowindow.marker != marker) {
+      infowindow.marker = marker;
+      infowindow.setContent('<div>' + marker.title + '</div>');
+      infowindow.open(map, marker);
+      // Make sure the marker property is cleared if the infowindow is closed.
+      infowindow.addListener('closeclick', function() {
+        infowindow.marker = null;
+      });
+    }
+  }
 };
+
+var model = new viewModel();
+ko.applyBindings(model);
