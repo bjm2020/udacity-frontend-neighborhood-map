@@ -57,6 +57,7 @@ var initMap = function() {
     markers.push(marker);
     // Create an onclick event to open an infowindow at each marker.
     marker.addListener('click', function() {
+      toggleBounce(this);
       populateInfoWindow(this, largeInfowindow);
     });
     bounds.extend(marker.position);
@@ -71,6 +72,7 @@ var initMap = function() {
       var id = $(this).index();
       map.setCenter(filteredMarkers[id].getPosition());
       map.setZoom(13);
+      toggleBounce(filteredMarkers[id]);
       populateInfoWindow(filteredMarkers[id], largeInfowindow);
     });
   }
@@ -103,6 +105,13 @@ var initMap = function() {
         infowindow.marker = null;
       });
     }
+  }
+
+  function toggleBounce(marker) {
+    marker.setAnimation(google.maps.Animation.BOUNCE);
+    setTimeout(function () {
+      marker.setAnimation(null);
+    }, 750);
   }
 };
 
