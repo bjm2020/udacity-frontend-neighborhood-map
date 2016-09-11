@@ -12,21 +12,21 @@ var viewModel = function() {
 
   this.filteredLocations = this.locations;
 
-  this.filterLocations = function(locationType) {
-    self.filteredLocations.removeAll();
-    neighborhood.locations.forEach(function(location) {
-      if (location.type === locationType) {
-        self.filteredLocations.push(location);
-      }
+  this.Query = ko.observable('');
+  this.filteredLocations = ko.computed(function() {
+    var q = self.Query().toLowerCase();
+    return self.locations().filter(function(i) {
+      return i.title.toLowerCase().indexOf(q) >= 0;
     });
-  };
+  });
+
 };
 
 var initMap = function() {
   // Constructor creates a new map - only center and zoom are required.
   var map = new google.maps.Map(document.getElementById('map'), {
-    center: {lat: 37.446062, lng: -122.160155},
-    zoom: 15
+    center: {lat: 37.609734, lng: -122.282254},
+    zoom: 10
   });
 
   // create markers;
@@ -62,22 +62,34 @@ var initMap = function() {
     bounds.extend(marker.position);
   });
 
-  // pop infowindow with click on list item
-  $(".loc-list").click(function() {
-    var id = $(this).index();
-    populateInfoWindow(markers[id], largeInfowindow);
-  });
+  map.fitBounds(bounds);
+  var filteredMarkers = markers;
 
-  // set markers upon filtering 
-  $(".loc-type").click(function(event) {
-    var id = $(this).index();
-    var locationType = neighborhood.locationTypes[id];
+  // pop infowindow with click on list item
+  function ListClickHandler() {
+    $(".loc-list").click(function() {
+      var id = $(this).index();
+      map.setCenter(filteredMarkers[id].getPosition());
+      map.setZoom(13);
+      populateInfoWindow(filteredMarkers[id], largeInfowindow);
+    });
+  }
+
+  ListClickHandler();
+
+  $(".form-control").keyup(function(event) {
+    var query = $(".form-control").val().toLowerCase();
+    filteredMarkers = [];
     markers.forEach(function(marker, i) {
-      marker.setMap(map);
-      if (neighborhood.locations[i].type != locationType) {
+      if (neighborhood.locations[i].title.toLowerCase().indexOf(query) >= 0) {
+        marker.setMap(map);
+        filteredMarkers.push(marker);
+      } else {
         marker.setMap(null);
       }
     });
+    map.fitBounds(bounds);
+    ListClickHandler();
   });
 
   function populateInfoWindow(marker, infowindow) {

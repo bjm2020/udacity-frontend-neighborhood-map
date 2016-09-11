@@ -6,17 +6,16 @@
     <link rel="stylesheet" href="css/style.css">
   </head>
   <body>
-    <div>
-      <ul data-bind="foreach: locationTypes">
-        <li class="loc-type" data-bind="text: $data, click: $parent.filterLocations"></li>
-      </ul>
+    <div id="main">
+      <div id="list">
+        <input class="form-control" data-bind="value: Query, valueUpdate: 'keyup'" autocomplete="off">
+        <ul data-bind="foreach: filteredLocations">
+          <li class="loc-list" data-bind="text: $data.title"></li>
+        </ul>
+      </div>
+      <div id="map"></div>
     </div>
-    <div>
-      <ul data-bind="foreach: filteredLocations">
-        <li class="loc-list" data-bind="text: $data.title"></li>
-      </ul>
-    </div>
-    <div id="map"></div>
+
     <script src="js/lib/knockout-3.4.0.js"></script>
     <script src="js/lib/jquery-3.1.0.min.js"></script>
     <script src="js/data/locations.js"></script>

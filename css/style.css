@@ -10,6 +10,18 @@ body {
   padding: 0;
 }
 
+#main {
+  height: 100%;
+  position: relative;
+}
+
 #map {
   height: 100%;
+}
+
+#list {
+  position: absolute;
+  top: 40px;
+  left: 10px;
+  z-index: 99;
 }
