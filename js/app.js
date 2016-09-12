@@ -109,7 +109,7 @@ var initMap = function() {
       if (status == google.maps.places.PlacesServiceStatus.OK) {
         var photos = place.photos;
         photos.forEach(function(photo) {
-          var url = photo.getUrl();
+          var url = photo.getUrl({'maxWidth': 400, 'maxHeight': 400});
           console.log(url);
         });
       }
