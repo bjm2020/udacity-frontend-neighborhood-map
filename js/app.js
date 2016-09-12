@@ -5,11 +5,6 @@ var viewModel = function() {
     self.locations.push(location);
   });
 
-  this.locationTypes = ko.observableArray();
-  neighborhood.locationTypes.forEach(function(type) {
-    self.locationTypes.push(type);
-  });
-
   this.filteredLocations = this.locations;
 
   this.Query = ko.observable('');
@@ -33,15 +28,6 @@ var initMap = function() {
   var largeInfowindow = new google.maps.InfoWindow();
   var bounds = new google.maps.LatLngBounds();
   var markers = [];
-  var images = {
-    Restaurant: {
-      url: 'images/purple.png',
-      // scaledSize: new google.maps.Size(30, 30)
-    },
-    Coffee: {url: 'images/blue.png'},
-    Shopping: {url: 'images/red.png'},
-    Transportation: {url: 'images/green.png'}
-  };
 
   neighborhood.locations.forEach(function(location, i) {
     // Create a marker per location, and put into markers array.
@@ -50,7 +36,7 @@ var initMap = function() {
        position: location.location,
        title: location.title,
        animation: google.maps.Animation.DROP,
-       icon: images[location.type],
+      //  icon: images[location.type],
        id: i
     });
     // Push the marker to our array of markers.
@@ -113,6 +99,23 @@ var initMap = function() {
       marker.setAnimation(null);
     }, 750);
   }
+
+  placeService = new google.maps.places.PlacesService(map);
+  function getPlaceDetails(placeId) {
+    var request = {placeId: placeId};
+    placeService.getDetails(request, callback);
+
+    function callback(place, status) {
+      if (status == google.maps.places.PlacesServiceStatus.OK) {
+        var photos = place.photos;
+        photos.forEach(function(photo) {
+          var url = photo.getUrl();
+          console.log(url);
+        });
+      }
+    }
+  }
+  getPlaceDetails('ChIJj61dQgK6j4AR4GeTYWZsKWw');
 };
 
 var model = new viewModel();
