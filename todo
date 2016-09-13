@@ -17,6 +17,6 @@ Requirement:
 async
 third-party API
 pictures or streetview ?
-bootstrap modal and carousel
+bootstrap modal carousel fixed height and width and still responsive
 responsive (hamburger button)
 CSS on searchbox/list/map

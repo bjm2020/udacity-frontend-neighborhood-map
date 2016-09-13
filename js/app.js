@@ -21,7 +21,17 @@ var initMap = function() {
   // Constructor creates a new map - only center and zoom are required.
   var map = new google.maps.Map(document.getElementById('map'), {
     center: {lat: 37.609734, lng: -122.282254},
-    zoom: 10
+    zoom: 10,
+    mapTypeControl: false,
+    zoomControl: true,
+    zoomControlOptions: {
+        position: google.maps.ControlPosition.LEFT_TOP
+    },
+    scaleControl: true,
+    streetViewControl: true,
+    streetViewControlOptions: {
+        position: google.maps.ControlPosition.LEFT_BOTTOM
+    }
   });
 
   // create markers;
