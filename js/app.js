@@ -95,15 +95,18 @@ var initMap = function() {
     if (infowindow.marker != marker) {
       infowindow.marker = marker;
       var contentString = '<div>' + marker.title + '</div>' +
-        '<button class="btn btn-default btn-carousel" data-toggle="modal" data-target=".modal-window">More Pictures</button>'
+        '<button class="btn-modal-image">More Pictures</button>'
       infowindow.setContent(contentString);
       infowindow.open(map, marker);
       // Make sure the marker property is cleared if the infowindow is closed.
       infowindow.addListener('closeclick', function() {
         infowindow.marker = null;
       });
-      $(".btn-carousel").click(function() {
+      $(".btn-modal-image").click(function() {
+        $(".modal-image-container").empty();
         getPlaceDetails(marker.id);
+        $(".modal").css('z-index', 3);
+        $(".modal").show();
       });
     }
   }
@@ -122,18 +125,15 @@ var initMap = function() {
 
     function callback(place, status) {
       if (status == google.maps.places.PlacesServiceStatus.OK) {
-        var photos = place.photos;
-        $(".carousel-inner").empty();
-        photos.forEach(function(photo, i) {
+        place.photos.forEach(function(photo, i) {
           var url = photo.getUrl({'maxWidth': 400, 'maxHeight': 400});
+          var contentString;
           if (i === 0) {
-            var contentString = '<div class="item Carousel-img active">' +
-              '<img class="img-responsive" src=' + url +'></div>';
+            contentString = '<span class="helper"></span><img class="active" src=' + url +'>';
           } else {
-            var contentString = '<div class="item Carousel-img">' +
-              '<img class="img-responsive" src=' + url +'></div>';
+            contentString = '<span class="helper"></span><img src=' + url +'>';
           }
-          $(".carousel-inner").append(contentString);
+          $(".modal-image-container").append(contentString);
         });
       }
     }
@@ -142,3 +142,38 @@ var initMap = function() {
 
 var model = new viewModel();
 ko.applyBindings(model);
+
+$(".btn-exit-modal").click(function() {
+  $(".modal").css('z-index', 0);
+  $(".modal").hide();
+});
+
+$(".arrow-right").click(function() {
+  var $next = $(".modal-image-container img.active").removeClass('active').next().next();
+  if ($next.length) {
+    $next.addClass('active');
+  } else {
+    $(".modal-image-container img:first").addClass('active');
+  }
+});
+
+$(".arrow-left").click(function() {
+  var $next = $(".modal-image-container img.active").removeClass('active').prev().prev();
+  if ($next.length) {
+    $next.addClass('active');
+  } else {
+    $(".modal-image-container img:last").addClass('active');
+  }
+});
+
+var menuVisible = true;
+$(".hamburger-menu").click(function() {
+  if (menuVisible) {
+    $(".search-list").hide();
+    menuVisible = false;
+  } else {
+    $(".search-list").show();
+    menuVisible = true;
+  }
+
+});
