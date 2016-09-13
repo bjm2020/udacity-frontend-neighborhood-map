@@ -37,7 +37,7 @@ var initMap = function() {
        title: location.title,
        animation: google.maps.Animation.DROP,
       //  icon: images[location.type],
-       id: i
+       id: location.placeId
     });
     // Push the marker to our array of markers.
     markers.push(marker);
@@ -84,11 +84,16 @@ var initMap = function() {
     // Check to make sure the infowindow is not already opened on this marker.
     if (infowindow.marker != marker) {
       infowindow.marker = marker;
-      infowindow.setContent('<div>' + marker.title + '</div>');
+      var contentString = '<div>' + marker.title + '</div>' +
+        '<button class="btn btn-default btn-carousel" data-toggle="modal" data-target=".modal-window">More Pictures</button>'
+      infowindow.setContent(contentString);
       infowindow.open(map, marker);
       // Make sure the marker property is cleared if the infowindow is closed.
       infowindow.addListener('closeclick', function() {
         infowindow.marker = null;
+      });
+      $(".btn-carousel").click(function() {
+        getPlaceDetails(marker.id);
       });
     }
   }
@@ -108,14 +113,21 @@ var initMap = function() {
     function callback(place, status) {
       if (status == google.maps.places.PlacesServiceStatus.OK) {
         var photos = place.photos;
-        photos.forEach(function(photo) {
+        $(".carousel-inner").empty();
+        photos.forEach(function(photo, i) {
           var url = photo.getUrl({'maxWidth': 400, 'maxHeight': 400});
-          console.log(url);
+          if (i === 0) {
+            var contentString = '<div class="item Carousel-img active">' +
+              '<img class="img-responsive" src=' + url +'></div>';
+          } else {
+            var contentString = '<div class="item Carousel-img">' +
+              '<img class="img-responsive" src=' + url +'></div>';
+          }
+          $(".carousel-inner").append(contentString);
         });
       }
     }
   }
-  getPlaceDetails('ChIJj61dQgK6j4AR4GeTYWZsKWw');
 };
 
 var model = new viewModel();

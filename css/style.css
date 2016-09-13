@@ -10,9 +10,22 @@ body {
   padding: 0;
 }
 
-#main {
+.container {
   height: 100%;
   position: relative;
+}
+
+body.modal-open .modal {
+    display: flex;
+    height: 100%;
+}
+
+body.modal-open .modal .modal-dialog {
+    margin: auto;
+}
+
+.carousel-inner > .item > img {
+    margin: 0 auto;
 }
 
 #map {
