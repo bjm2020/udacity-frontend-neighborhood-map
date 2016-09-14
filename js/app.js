@@ -47,7 +47,9 @@ var initMap = function() {
        title: location.title,
        animation: google.maps.Animation.DROP,
        icon: 'images/purple-marker-32.png',
-       id: location.placeId
+       description: location.description,
+       descriptionSrc: location.link,
+       id: location.placeId,
     });
     // Push the marker to our array of markers.
     markers.push(marker);
@@ -96,11 +98,11 @@ var initMap = function() {
     if (infowindow.marker != marker) {
       infowindow.marker = marker;
       var contentString = '<div class="infowindow-scroll"><h3>' + marker.title + '</h3>' +
-        '<div id="wikiElem"></div>' +
-        '<button class="btn-modal-image">More Pictures</button></div>';
+        '<p>' + marker.description + '</p>' +
+        '<a href="' + marker.descriptionSrc + ' ">' + marker.descriptionSrc + '</a>' +
+        '<div><button class="btn-modal-image">More Pictures</button></div></div>';
       infowindow.setContent(contentString);
       infowindow.open(map, marker);
-      getWikiResults(marker.title);
       // Make sure the marker property is cleared if the infowindow is closed.
       infowindow.addListener('closeclick', function() {
         infowindow.marker = null;
@@ -112,29 +114,6 @@ var initMap = function() {
         $(".modal").show();
       });
     }
-  }
-
-  function getWikiResults(title) {
-    // wikipedia
-    var $wikiElem = $("#wikiElem");
-    var wikiurl = "https://en.wikipedia.org/w/api.php?format=json&action=query&prop=extracts&exintro=&explaintext=&titles=" + title;
-    var wikiRequestTimeout = setTimeout(function() {
-      $wikiElem.append("Failed to get wikipedia resources");
-    }, 8000);
-
-    $.ajax({
-      url: wikiurl,
-      method: "GET",
-      dataType: "jsonp",
-      success: function(data) {
-        var articles = data.query.pages;
-        for (var key in articles) {
-          $wikiElem.append('<p>' + articles[key].extract.split('\n')[0] + '</p>');
-        }
-        clearTimeout(wikiRequestTimeout);
-      }
-    });
-    return wikiElem;
   }
 
   function toggleBounce(marker) {
@@ -203,4 +182,33 @@ $(function () {
       menuVisible = true;
     }
   });
+
+  // function getWikiResults(title) {
+  //   // wikipedia
+  //   // var $wikiElem = $("#wikiElem");
+  //   var wikiElem = {wikiText: "", wikiImageSrc: ""};
+  //   var wikiurl = "https://en.wikipedia.org/w/api.php?format=json&action=query&prop=extracts|pageimages&exintro=&explaintext=&pithumbsize=200&titles=" + title;
+  //   // var wikiurl = "http://en.wikipedia.org/w/api.php?action=query&prop=pageimages&format=json&pithumbsize=100&titles=" + title;
+  //   var wikiRequestTimeout = setTimeout(function() {
+  //     wikiElem += "Failed to get wikipedia resources";
+  //   }, 8000);
+  //
+  //   $.ajax({
+  //     url: wikiurl,
+  //     method: "GET",
+  //     dataType: "jsonp",
+  //     success: function(data) {
+  //       var articles = data.query.pages;
+  //       for (var key in articles) {
+  //         wikiElem.wikiText += articles[key].extract.split('\n')[0];
+  //         wikiElem.wikiImageSrc
+  //         wikiElem += '<p>' + articles[key].extract.split('\n')[0] + '</p>' +
+  //         '<img src="' + articles[key].thumbnail.source + '">';
+  //       }
+  //       clearTimeout(wikiRequestTimeout);
+  //     }
+  //   });
+  //   return wikiElem;
+  // }
+
 });

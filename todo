@@ -16,6 +16,6 @@ Requirement:
 
 async
 third-party API - flickr pictures
-infowindow more content
+infowindow z-index not correct
 check model view seperation ?
 write documentation

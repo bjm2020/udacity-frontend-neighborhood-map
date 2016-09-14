@@ -19,10 +19,16 @@ body {
 .infowindow-scroll {
   line-height: 1.35;
   max-height: 200px;
-  max-width: 50px
+  max-width: 300px;
   overflow: hidden;
   overflow-x: scroll;
-  z-index: 2;
+  overflow-y: scroll;
+}
+
+.btn-modal-image {
+  margin: 5px;
+  padding: 5px;
+  border-radius: 5%;
 }
 
 .search-container {
@@ -59,6 +65,11 @@ ul {
 li {
   text-align: center;
   margin: 0 0 10px 0;
+  color: purple;
+  font-family: "Comic Sans MS";
+}
+
+h3 {
   color: purple;
   font-family: "Comic Sans MS";
 }
