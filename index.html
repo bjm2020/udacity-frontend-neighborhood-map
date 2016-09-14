@@ -4,7 +4,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta charset="utf-8">
     <link rel="stylesheet" href="css/style.css">
-    <link media="screen and (max-device-width: 600px)" rel="stylesheet" href="css/responsive.css" />
+    <link media="screen and (max-device-width: 700px)" rel="stylesheet" href="css/responsive.css" />
   </head>
   <body>
     <div id="map"></div>
@@ -13,7 +13,8 @@
         <img src="images/hamburger_menu.svg" alt="hamburger menu">
       </div>
       <div class="search-list">
-        <input class="form-control " data-bind="value: Query, valueUpdate: 'keyup'" autocomplete="off">
+        <input class="form-control " data-bind="value: Query, valueUpdate: 'keyup'"
+          autocomplete="off" placeholder="Filter locations">
         <ul class="list" data-bind="foreach: filteredLocations">
           <li class="loc-list" data-bind="text: $data.title"></li>
         </ul>

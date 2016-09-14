@@ -16,35 +16,42 @@ body {
   height: 100%;
 }
 
+.infowindow-scroll {
+  line-height: 1.35;
+  max-height: 200px;
+  max-width: 50px
+  overflow: hidden;
+  overflow-x: scroll;
+  z-index: 2;
+}
+
 .search-container {
   position: absolute;
   top: 10px;
-  right: 10px;
+  left: 10px;
   z-index: 1;
 }
 
 .hamburger-menu {
-  float: right;
-  clear: right;
+  float: left;
 }
 
 .form-control {
-  width: 100%;
+  /*width: 100%;*/
   padding: 5px;
-  border: 2px solid orange;
+  border: 2px solid purple;
   border-radius: 5%;
 }
 
 .list {
-  background-color: white;
+  background-color: rgba(256, 256, 256, 0.8);
 }
 
-ul
-{
+ul {
   list-style-type: none;
   margin: auto;
   padding: 0;
-  max-height: 30vh;
+  max-height: 70vh;
   overflow: hidden;
   overflow-y: scroll;
 }
@@ -52,6 +59,8 @@ ul
 li {
   text-align: center;
   margin: 0 0 10px 0;
+  color: purple;
+  font-family: "Comic Sans MS";
 }
 
 .modal {
@@ -77,7 +86,7 @@ li {
 }
 
 .btn-exit-modal {
-  margin-left: 92%;
+  margin-left: 94%;
   width: 45px;
 }
 

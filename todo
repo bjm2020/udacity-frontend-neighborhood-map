@@ -15,8 +15,7 @@ Requirement:
 11. mobile responsive (hamburger menu)
 
 async
-third-party API
-pictures or streetview ?
-bootstrap modal carousel fixed height and width and still responsive
-responsive (hamburger button)
-CSS on searchbox/list/map
+third-party API - flickr pictures
+infowindow more content
+check model view seperation ?
+write documentation

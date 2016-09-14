@@ -25,12 +25,12 @@ var initMap = function() {
     mapTypeControl: false,
     zoomControl: true,
     zoomControlOptions: {
-        position: google.maps.ControlPosition.LEFT_TOP
+        position: google.maps.ControlPosition.RIGHT_BOTTOM
     },
     scaleControl: true,
     streetViewControl: true,
     streetViewControlOptions: {
-        position: google.maps.ControlPosition.LEFT_BOTTOM
+        position: google.maps.ControlPosition.RIGHT_BOTTOM
     }
   });
 
@@ -46,7 +46,7 @@ var initMap = function() {
        position: location.location,
        title: location.title,
        animation: google.maps.Animation.DROP,
-      //  icon: images[location.type],
+       icon: 'images/purple-marker-32.png',
        id: location.placeId
     });
     // Push the marker to our array of markers.
@@ -60,6 +60,7 @@ var initMap = function() {
   });
 
   map.fitBounds(bounds);
+
   var filteredMarkers = markers;
 
   // pop infowindow with click on list item
@@ -94,10 +95,12 @@ var initMap = function() {
     // Check to make sure the infowindow is not already opened on this marker.
     if (infowindow.marker != marker) {
       infowindow.marker = marker;
-      var contentString = '<div>' + marker.title + '</div>' +
-        '<button class="btn-modal-image">More Pictures</button>'
+      var contentString = '<div class="infowindow-scroll"><h3>' + marker.title + '</h3>' +
+        '<div id="wikiElem"></div>' +
+        '<button class="btn-modal-image">More Pictures</button></div>';
       infowindow.setContent(contentString);
       infowindow.open(map, marker);
+      getWikiResults(marker.title);
       // Make sure the marker property is cleared if the infowindow is closed.
       infowindow.addListener('closeclick', function() {
         infowindow.marker = null;
@@ -109,6 +112,29 @@ var initMap = function() {
         $(".modal").show();
       });
     }
+  }
+
+  function getWikiResults(title) {
+    // wikipedia
+    var $wikiElem = $("#wikiElem");
+    var wikiurl = "https://en.wikipedia.org/w/api.php?format=json&action=query&prop=extracts&exintro=&explaintext=&titles=" + title;
+    var wikiRequestTimeout = setTimeout(function() {
+      $wikiElem.append("Failed to get wikipedia resources");
+    }, 8000);
+
+    $.ajax({
+      url: wikiurl,
+      method: "GET",
+      dataType: "jsonp",
+      success: function(data) {
+        var articles = data.query.pages;
+        for (var key in articles) {
+          $wikiElem.append('<p>' + articles[key].extract.split('\n')[0] + '</p>');
+        }
+        clearTimeout(wikiRequestTimeout);
+      }
+    });
+    return wikiElem;
   }
 
   function toggleBounce(marker) {
@@ -143,37 +169,38 @@ var initMap = function() {
 var model = new viewModel();
 ko.applyBindings(model);
 
-$(".btn-exit-modal").click(function() {
-  $(".modal").css('z-index', 0);
-  $(".modal").hide();
-});
+$(function () {
+  $(".btn-exit-modal").click(function() {
+    $(".modal").css('z-index', 0);
+    $(".modal").hide();
+  });
 
-$(".arrow-right").click(function() {
-  var $next = $(".modal-image-container img.active").removeClass('active').next().next();
-  if ($next.length) {
-    $next.addClass('active');
-  } else {
-    $(".modal-image-container img:first").addClass('active');
-  }
-});
+  $(".arrow-right").click(function() {
+    var $next = $(".modal-image-container img.active").removeClass('active').next().next();
+    if ($next.length) {
+      $next.addClass('active');
+    } else {
+      $(".modal-image-container img:first").addClass('active');
+    }
+  });
 
-$(".arrow-left").click(function() {
-  var $next = $(".modal-image-container img.active").removeClass('active').prev().prev();
-  if ($next.length) {
-    $next.addClass('active');
-  } else {
-    $(".modal-image-container img:last").addClass('active');
-  }
-});
+  $(".arrow-left").click(function() {
+    var $next = $(".modal-image-container img.active").removeClass('active').prev().prev();
+    if ($next.length) {
+      $next.addClass('active');
+    } else {
+      $(".modal-image-container img:last").addClass('active');
+    }
+  });
 
-var menuVisible = true;
-$(".hamburger-menu").click(function() {
-  if (menuVisible) {
-    $(".search-list").hide();
-    menuVisible = false;
-  } else {
-    $(".search-list").show();
-    menuVisible = true;
-  }
-
+  var menuVisible = true;
+  $(".hamburger-menu").click(function() {
+    if (menuVisible) {
+      $(".search-list").hide();
+      menuVisible = false;
+    } else {
+      $(".search-list").show();
+      menuVisible = true;
+    }
+  });
 });
