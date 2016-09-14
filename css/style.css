@@ -44,6 +44,9 @@ ul
   list-style-type: none;
   margin: auto;
   padding: 0;
+  max-height: 30vh;
+  overflow: hidden;
+  overflow-y: scroll;
 }
 
 li {
