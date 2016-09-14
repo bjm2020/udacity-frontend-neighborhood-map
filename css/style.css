@@ -18,7 +18,7 @@ body {
 
 .infowindow-scroll {
   line-height: 1.35;
-  max-height: 200px;
+  max-height: 300px;
   max-width: 300px;
   overflow: hidden;
   overflow-x: scroll;
@@ -87,6 +87,7 @@ h3 {
 .modal-container {
   max-width: 500px;
   min-width: 500px;
+  max-height: 400px
   height: 400px;
   width: 40%;
   margin: 8% auto;

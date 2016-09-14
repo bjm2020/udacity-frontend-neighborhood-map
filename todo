@@ -14,7 +14,8 @@ Requirement:
 10. intuitive interface (details not written here)
 11. mobile responsive (hamburger menu)
 
-async
+check async
+error handling
 third-party API - flickr pictures
 infowindow z-index not correct
 check model view seperation ?
