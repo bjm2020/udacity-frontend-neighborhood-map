@@ -139,10 +139,6 @@ var initMap = function() {
         getPlaceDetails(marker.id);
         // get photos from flickr using lat/lon and title
         getFlickrPic(marker.location, marker.title);
-        // if images cant be loaded or images dont exist
-        if ($(".modal-image-container").is(':empty')) {
-          $(".modal-image-container").append("<p>Images don't exist or can't be loaded.</p>");
-        }
         // show the modal
         $(".modal").css('z-index', 3);
         $(".modal").show();
@@ -176,6 +172,7 @@ var initMap = function() {
           $(".modal-image-container").append(contentString);
         });
       } else {
+        $(".modal-image-container").append('<p>Failed to get Google photos.</p>');
         console.log("Google images can't be loaded.");
       }
     }
@@ -198,6 +195,7 @@ function getFlickrPic(location, title) {
         }
       });
     } else {
+      $(".modal-image-container").append('<p>Failed to get Flickr photos.</p>')
       console.log("Flickr images cant be loaded.");
     }
   });
