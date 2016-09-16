@@ -12,6 +12,12 @@
     max-height: 30vh;
   }
 
+  .modal-container{
+    max-width: 95vw;
+    min-width: 95vw;
+    margin: 30% auto;
+  }
+
   .modal-image-container img {
     position: relative;
     margin: auto;
@@ -21,15 +27,20 @@
     display: none;
   }
 
-  .modal-container{
-    max-width: 95vw;
-    min-width: 95vw;
-    margin: 30% auto;
-  }
-
 }
 
 @media screen and (max-width: 700px) and (orientation:landscape) {
+  .modal-container{
+    max-width: 95vw;
+    min-width: 95vw;
+    height: 95vh;
+    margin: 2% auto;
+  }
+
+  .modal-image-container {
+    height: 70vh;
+  }
+
   .modal-image-container img {
     position: relative;
     display: none;
@@ -37,16 +48,6 @@
     max-width: 95vw;
     overflow: hidden;
     height: 70vh;
-  }
-
-  .modal-image-container {
-    height: 70vh;
-  }
-  .modal-container{
-    max-width: 95vw;
-    min-width: 95vw;
-    height: 95vh;
-    margin: 2% auto;
   }
 
 }

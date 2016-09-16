@@ -12,9 +12,13 @@ body {
   margin: 0;
 }
 
+/* CSS related to map */
+
 #map {
   height: 100%;
 }
+
+/* CSS related to infowindow */
 
 .infowindow-scroll {
   line-height: 1.35;
@@ -25,11 +29,18 @@ body {
   overflow-y: scroll;
 }
 
+h3 {
+  color: purple;
+  font-family: "Comic Sans MS";
+}
+
 .btn-modal-image {
   margin: 5px;
   padding: 5px;
   border-radius: 5%;
 }
+
+/* CSS related to search container */
 
 .search-container {
   position: absolute;
@@ -69,10 +80,7 @@ li {
   font-family: "Comic Sans MS";
 }
 
-h3 {
-  color: purple;
-  font-family: "Comic Sans MS";
-}
+/* CSS related to modal */
 
 .modal {
   position: absolute;
@@ -102,14 +110,6 @@ h3 {
   width: 45px;
 }
 
-.btn-scroll img {
-  width: 45px;
-}
-
-.arrow-right {
-  float: right;
-}
-
 .modal-image-container {
   height: 300px;
   text-align: center;
@@ -130,4 +130,12 @@ h3 {
 
 .modal-image-container .active {
   display: inline-block;
+}
+
+.btn-scroll img {
+  width: 45px;
+}
+
+.arrow-right {
+  float: right;
 }

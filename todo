@@ -15,8 +15,7 @@ Requirement:
 11. mobile responsive (hamburger menu)
 
 check async
-error handling
-third-party API - flickr pictures
-infowindow z-index not correct
+error handling - not existing
+infowindow z-index not correct - can't solve
 check model view seperation ?
 write documentation

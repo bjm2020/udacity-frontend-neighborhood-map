@@ -1,12 +1,18 @@
+// viewModel provides data binding using knockout
+
 var viewModel = function() {
   var self = this;
+
+  // read locations
   this.locations = ko.observableArray();
   neighborhood.locations.forEach(function(location) {
     self.locations.push(location);
   });
 
+  // filteredLocations is locatins without filtering
   this.filteredLocations = this.locations;
 
+  // compute filteredLocations upon search query input
   this.Query = ko.observable('');
   this.filteredLocations = ko.computed(function() {
     var q = self.Query().toLowerCase();
@@ -14,11 +20,10 @@ var viewModel = function() {
       return i.title.toLowerCase().indexOf(q) >= 0;
     });
   });
-
 };
 
 var initMap = function() {
-  // Constructor creates a new map - only center and zoom are required.
+  // create a new map
   var map = new google.maps.Map(document.getElementById('map'), {
     center: {lat: 37.609734, lng: -122.282254},
     zoom: 10,
@@ -34,11 +39,12 @@ var initMap = function() {
     }
   });
 
-  // create markers;
   var largeInfowindow = new google.maps.InfoWindow();
   var bounds = new google.maps.LatLngBounds();
   var markers = [];
+  var placeService = new google.maps.places.PlacesService(map);
 
+  // create markers
   neighborhood.locations.forEach(function(location, i) {
     // Create a marker per location, and put into markers array.
     var marker = new google.maps.Marker({
@@ -50,37 +56,37 @@ var initMap = function() {
        description: location.description,
        descriptionSrc: location.link,
        id: location.placeId,
+       location: location.location
     });
     // Push the marker to our array of markers.
     markers.push(marker);
     // Create an onclick event to open an infowindow at each marker.
     marker.addListener('click', function() {
+      // bounce the marker upon click
       toggleBounce(this);
+      // open infowindow
       populateInfoWindow(this, largeInfowindow);
     });
+    // extends the map bounds with current marker
     bounds.extend(marker.position);
   });
 
+  // refit map bounds after completing markers
   map.fitBounds(bounds);
 
+  // without search query, filteredMarkers are the same as markers
   var filteredMarkers = markers;
 
-  // pop infowindow with click on list item
-  function ListClickHandler() {
-    $(".loc-list").click(function() {
-      var id = $(this).index();
-      map.setCenter(filteredMarkers[id].getPosition());
-      map.setZoom(13);
-      toggleBounce(filteredMarkers[id]);
-      populateInfoWindow(filteredMarkers[id], largeInfowindow);
-    });
-  }
-
+  // event handler when a list item is clicked
   ListClickHandler();
 
+  // filter markers when a search query is input
   $(".form-control").keyup(function(event) {
+    // get query text
     var query = $(".form-control").val().toLowerCase();
+    // calculate filteredMarkers
     filteredMarkers = [];
+    // for each marker, if its title matches query, remain on the map; otherwise remove from map
     markers.forEach(function(marker, i) {
       if (neighborhood.locations[i].title.toLowerCase().indexOf(query) >= 0) {
         marker.setMap(map);
@@ -89,33 +95,58 @@ var initMap = function() {
         marker.setMap(null);
       }
     });
+    // re-fit map bounds
     map.fitBounds(bounds);
+    // re-initiate lists and the corresponding click events
     ListClickHandler();
   });
+
+  // function to handle when a list item is clicked
+  function ListClickHandler() {
+    $(".loc-list").click(function() {
+      // check the id of the list clicked
+      var id = $(this).index();
+      // center the map on this marker and zoom the map
+      map.setCenter(filteredMarkers[id].getPosition());
+      map.setZoom(13);
+      //  bounce the marker when the list item is clicked
+      toggleBounce(filteredMarkers[id]);
+      // open infowindow when list item is clicked
+      populateInfoWindow(filteredMarkers[id], largeInfowindow);
+    });
+  }
 
   function populateInfoWindow(marker, infowindow) {
     // Check to make sure the infowindow is not already opened on this marker.
     if (infowindow.marker != marker) {
       infowindow.marker = marker;
+      // set infowindow content
       var contentString = '<div class="infowindow-scroll"><h3>' + marker.title + '</h3>' +
         '<p>' + marker.description + '</p>' +
         '<a href="' + marker.descriptionSrc + ' ">' + marker.descriptionSrc + '</a>' +
-        '<div><button class="btn-modal-image">More Pictures</button></div></div>';
+        '<div><button class="btn-modal-image">Pictures from Google and Flickr</button></div></div>';
       infowindow.setContent(contentString);
       infowindow.open(map, marker);
       // Make sure the marker property is cleared if the infowindow is closed.
       infowindow.addListener('closeclick', function() {
         infowindow.marker = null;
       });
+      // handle images button
       $(".btn-modal-image").click(function() {
+        // when the button is clicked, removed images from last click
         $(".modal-image-container").empty();
+        // get photos from google places api
         getPlaceDetails(marker.id);
+        // get photos from flickr using lat/lon and title
+        getFlickrPic(marker.location, marker.title);
+        // show the modal
         $(".modal").css('z-index', 3);
         $(".modal").show();
       });
     }
   }
 
+  // animation for marker when clicked, bounce only once (750ms)
   function toggleBounce(marker) {
     marker.setAnimation(google.maps.Animation.BOUNCE);
     setTimeout(function () {
@@ -123,7 +154,7 @@ var initMap = function() {
     }, 750);
   }
 
-  placeService = new google.maps.places.PlacesService(map);
+  // get google places photos
   function getPlaceDetails(placeId) {
     var request = {placeId: placeId};
     placeService.getDetails(request, callback);
@@ -145,33 +176,60 @@ var initMap = function() {
   }
 };
 
-var model = new viewModel();
-ko.applyBindings(model);
+// get flickr picture give lat/lon and title, max 10 photos
+function getFlickrPic(location, title) {
+  var flickrSearchUrl = "https://api.flickr.com/services/rest/?method=flickr.photos.search&api_key=144866a99011ed200e8ff4d6df0a7033&format=json&jsoncallback=?"
+    + "&lat=" + location.lat + "&lon=" + location.lng + "&tags=" + title + "&radius=1&per_page=10";
+  $.getJSON(flickrSearchUrl, function(data) {
+    if (data.stat === 'ok') {
+      var imageUrl, contentString;
+      data.photos.photo.forEach(function(photo) {
+        if (photo.ispublic) {
+          imageUrl = "http://farm" + photo.farm + ".static.flickr.com/" +
+            photo.server + "/" + photo.id + "_" + photo.secret + ".jpg";
+          contentString = '<span class="helper"></span><img src=' + imageUrl +' alt=' + photo.title + '>';
+          $(".modal-image-container").append(contentString);
+        }
+      });
+    }
+  });
+}
+
 
 $(function () {
+  // apply data bindings to viewModel
+  var model = new viewModel();
+  ko.applyBindings(model);
+
+  // hide modal when close-button is clicked
   $(".btn-exit-modal").click(function() {
     $(".modal").css('z-index', 0);
     $(".modal").hide();
   });
 
+  // move to the next image when arrow-right is clicked
   $(".arrow-right").click(function() {
     var $next = $(".modal-image-container img.active").removeClass('active').next().next();
     if ($next.length) {
       $next.addClass('active');
     } else {
+      // if last image, jump to the first image
       $(".modal-image-container img:first").addClass('active');
     }
   });
 
+  // move to the previous image when left-arrow is clicked
   $(".arrow-left").click(function() {
     var $next = $(".modal-image-container img.active").removeClass('active').prev().prev();
     if ($next.length) {
       $next.addClass('active');
     } else {
+      // if first image, then jump to the last image
       $(".modal-image-container img:last").addClass('active');
     }
   });
 
+  // show or hide search and list when hamburger button is clicked
   var menuVisible = true;
   $(".hamburger-menu").click(function() {
     if (menuVisible) {
@@ -182,33 +240,4 @@ $(function () {
       menuVisible = true;
     }
   });
-
-  // function getWikiResults(title) {
-  //   // wikipedia
-  //   // var $wikiElem = $("#wikiElem");
-  //   var wikiElem = {wikiText: "", wikiImageSrc: ""};
-  //   var wikiurl = "https://en.wikipedia.org/w/api.php?format=json&action=query&prop=extracts|pageimages&exintro=&explaintext=&pithumbsize=200&titles=" + title;
-  //   // var wikiurl = "http://en.wikipedia.org/w/api.php?action=query&prop=pageimages&format=json&pithumbsize=100&titles=" + title;
-  //   var wikiRequestTimeout = setTimeout(function() {
-  //     wikiElem += "Failed to get wikipedia resources";
-  //   }, 8000);
-  //
-  //   $.ajax({
-  //     url: wikiurl,
-  //     method: "GET",
-  //     dataType: "jsonp",
-  //     success: function(data) {
-  //       var articles = data.query.pages;
-  //       for (var key in articles) {
-  //         wikiElem.wikiText += articles[key].extract.split('\n')[0];
-  //         wikiElem.wikiImageSrc
-  //         wikiElem += '<p>' + articles[key].extract.split('\n')[0] + '</p>' +
-  //         '<img src="' + articles[key].thumbnail.source + '">';
-  //       }
-  //       clearTimeout(wikiRequestTimeout);
-  //     }
-  //   });
-  //   return wikiElem;
-  // }
-
 });
