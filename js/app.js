@@ -139,6 +139,10 @@ var initMap = function() {
         getPlaceDetails(marker.id);
         // get photos from flickr using lat/lon and title
         getFlickrPic(marker.location, marker.title);
+        // if images cant be loaded or images dont exist
+        if ($(".modal-image-container").is(':empty')) {
+          $(".modal-image-container").append("<p>Images don't exist or can't be loaded.</p>");
+        }
         // show the modal
         $(".modal").css('z-index', 3);
         $(".modal").show();
@@ -191,6 +195,8 @@ function getFlickrPic(location, title) {
           $(".modal-image-container").append(contentString);
         }
       });
+    } else {
+      console.log("Flickr images cant be loaded.");
     }
   });
 }
@@ -230,7 +236,7 @@ $(function () {
   });
 
   // show or hide search and list when hamburger button is clicked
-  var menuVisible = true;
+  var menuVisible = $(".search-list").is(':visible');
   $(".hamburger-menu").click(function() {
     if (menuVisible) {
       $(".search-list").hide();
