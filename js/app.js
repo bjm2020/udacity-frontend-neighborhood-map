@@ -175,6 +175,8 @@ var initMap = function() {
           }
           $(".modal-image-container").append(contentString);
         });
+      } else {
+        console.log("Google images can't be loaded.");
       }
     }
   }
