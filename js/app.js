@@ -156,14 +156,13 @@ var initMap = function() {
 
   // get google places photos
   function getPlaceDetails(placeId) {
-    var request = {placeId: placeId};
-    placeService.getDetails(request, callback);
+    placeService.getDetails({placeId: placeId}, callback);
 
     function callback(place, status) {
       if (status == google.maps.places.PlacesServiceStatus.OK) {
+        var url, contentString;
         place.photos.forEach(function(photo, i) {
-          var url = photo.getUrl({'maxWidth': 400, 'maxHeight': 400});
-          var contentString;
+          url = photo.getUrl({'maxWidth': 400, 'maxHeight': 400});
           if (i === 0) {
             contentString = '<span class="helper"></span><img class="active" src=' + url +'>';
           } else {
@@ -214,8 +213,9 @@ $(function () {
   });
 
   // move to the next image when arrow-right is clicked
+  var $next;
   $(".arrow-right").click(function() {
-    var $next = $(".modal-image-container img.active").removeClass('active').next().next();
+    $next = $(".modal-image-container img.active").removeClass('active').next().next();
     if ($next.length) {
       $next.addClass('active');
     } else {
@@ -226,7 +226,7 @@ $(function () {
 
   // move to the previous image when left-arrow is clicked
   $(".arrow-left").click(function() {
-    var $next = $(".modal-image-container img.active").removeClass('active').prev().prev();
+    $next = $(".modal-image-container img.active").removeClass('active').prev().prev();
     if ($next.length) {
       $next.addClass('active');
     } else {
