@@ -3,6 +3,12 @@
 var viewModel = function() {
   var self = this;
 
+  // whether search-list is visible through menu clickings
+  this.menuVisible = ko.observable(true);
+  this.toggleSearchList = function() {
+    self.menuVisible(!self.menuVisible());
+  };
+
   // read locations
   this.locations = ko.observableArray();
   neighborhood.locations.forEach(function(location) {
@@ -20,7 +26,28 @@ var viewModel = function() {
       return i.title.toLowerCase().indexOf(q) >= 0;
     });
   });
+
+  // hide modal when close-button is clicked
+  this.exitModal = function() {
+    $(".modal").css('z-index', 0);
+    $(".modal").hide();
+  };
 };
+
+// maps loading error handling
+var isMapsApiLoaded = false;
+var mapsCallback = function () {
+  isMapsApiLoaded = true;
+  $("#map").empty();
+  initMap();
+};
+
+// if map api is not loaded after 1000ms, error message is appended to #map
+setTimeout(function() {
+  if (!isMapsApiLoaded) {
+    $("#map").append("<div class='google-error'>Google Maps can't be loaded</div>");
+  }
+}, 1000);
 
 var initMap = function() {
   // create a new map
@@ -171,7 +198,8 @@ var initMap = function() {
           $(".modal-image-container").append(contentString);
         });
       } else {
-        $(".modal-image-container").append('<p>Failed to get Google photos.</p>');
+        // error handling
+        $(".modal-image-container").append('<span class="helper"></span><img class="active" src="#" alt="Failed to get Google photos. Click arrow for Flickr photos.">');
         console.log("Google images can't be loaded.");
       }
     }
@@ -194,23 +222,21 @@ function getFlickrPic(location, title) {
         }
       });
     } else {
-      $(".modal-image-container").append('<p>Failed to get Flickr photos.</p>')
+      // error handling
+      $(".modal-image-container").append('<span class="helper"></span><img src="#" alt="Failed to get Flickr photos. Click arrow for Google photos.">');
       console.log("Flickr images cant be loaded.");
     }
+  })
+  // error handling
+  .fail(function() {
+    $(".modal-image-container").append('<span class="helper"></span><img src="#" alt="Failed to get Flickr photos. Click arrow for Google photos.">');
   });
 }
-
 
 $(function () {
   // apply data bindings to viewModel
   var model = new viewModel();
   ko.applyBindings(model);
-
-  // hide modal when close-button is clicked
-  $(".btn-exit-modal").click(function() {
-    $(".modal").css('z-index', 0);
-    $(".modal").hide();
-  });
 
   // move to the next image when arrow-right is clicked
   var $next;
@@ -232,18 +258,6 @@ $(function () {
     } else {
       // if first image, then jump to the last image
       $(".modal-image-container img:last").addClass('active');
-    }
-  });
-
-  // show or hide search and list when hamburger button is clicked
-  var menuVisible = $(".search-list").is(':visible');
-  $(".hamburger-menu").click(function() {
-    if (menuVisible) {
-      $(".search-list").hide();
-      menuVisible = false;
-    } else {
-      $(".search-list").show();
-      menuVisible = true;
     }
   });
 });

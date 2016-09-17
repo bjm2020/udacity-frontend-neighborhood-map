@@ -143,3 +143,10 @@ li:hover {
 .arrow-right {
   float: right;
 }
+
+.google-error {
+  text-align: center;
+  vertical-align: middle;
+  line-height: 100vh;
+  font-size: 1.5em;
+}
