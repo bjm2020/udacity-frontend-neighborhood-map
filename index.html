@@ -5,7 +5,7 @@
     <meta charset="utf-8">
     <title>Bay Area Tech Companies Map</title>
     <link rel="stylesheet" href="css/style.css">
-    <link media="screen and (max-device-width: 700px)" rel="stylesheet" href="css/responsive.css" />
+    <link media="screen and (max-width: 700px)" rel="stylesheet" href="css/responsive.css" />
   </head>
   <body>
     <div id="map"></div>
@@ -40,7 +40,8 @@
     <script src="js/data/locations.js"></script>
     <script src="js/app.js"></script>
     <script async defer
-        src="https://maps.googleapis.com/maps/api/js?&libraries=places&key=AIzaSyCd98n-T22Sx1JwDaxafjxDmyNd1CoYarY&v=3&callback=mapsCallback">
+        src="https://maps.googleapis.com/maps/api/js?&libraries=places&key=AIzaSyCd98n-T22Sx1JwDaxafjxDmyNd1CoYarY&v=3&callback=initMap"
+        onerror="mapsErrorHandler()">
     </script>
   </body>
 </html>

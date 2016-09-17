@@ -35,19 +35,9 @@ var viewModel = function() {
 };
 
 // maps loading error handling
-var isMapsApiLoaded = false;
-var mapsCallback = function () {
-  isMapsApiLoaded = true;
-  $("#map").empty();
-  initMap();
+var mapsErrorHandler = function() {
+  $("#map").append("<div class='google-error'>Google Maps can't be loaded</div>");
 };
-
-// if map api is not loaded after 1000ms, error message is appended to #map
-setTimeout(function() {
-  if (!isMapsApiLoaded) {
-    $("#map").append("<div class='google-error'>Google Maps can't be loaded</div>");
-  }
-}, 1000);
 
 var initMap = function() {
   // create a new map
