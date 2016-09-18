@@ -12,6 +12,15 @@ body {
   margin: 0;
 }
 
+/* CSS related to map loading error */
+
+.google-error {
+  text-align: center;
+  vertical-align: middle;
+  line-height: 100vh;
+  font-size: 1.5em;
+}
+
 /* CSS related to map */
 
 #map {
@@ -92,14 +101,14 @@ li:hover {
   height: 100%;
   width: 100%;
   background-color: rgba(0, 0, 0, 0.3);
-  z-index: 0;
+  z-index: 3;
   display: none;
 }
 
 .modal-container {
   max-width: 500px;
   min-width: 500px;
-  max-height: 400px
+  max-height: 400px;
   height: 400px;
   width: 40%;
   margin: 8% auto;
@@ -142,11 +151,4 @@ li:hover {
 
 .arrow-right {
   float: right;
-}
-
-.google-error {
-  text-align: center;
-  vertical-align: middle;
-  line-height: 100vh;
-  font-size: 1.5em;
 }
