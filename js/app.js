@@ -225,7 +225,7 @@ var viewModel = function() {
             $.getJSON(flickrPhotoInfoUrl, function(data1) {
               if (data1.stat === 'ok') {
                 // url to get image
-                imageUrl = "http://farm" + data1.photo.farm + ".static.flickr.com/" +
+                imageUrl = "https://farm" + data1.photo.farm + ".static.flickr.com/" +
                   data1.photo.server + "/" + data1.photo.id + "_" + data1.photo.secret + ".jpg";
                 // url to link to the original post on flickr
                 originalImgSrc = data1.photo.urls.url[0]._content;
