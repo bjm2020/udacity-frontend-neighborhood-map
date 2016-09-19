@@ -1,4 +1,3 @@
-// viewModel provides data binding using knockout
 var locationModel = function(loc) {
   var self = this;
 
@@ -33,7 +32,8 @@ var locationModel = function(loc) {
   });
 };
 
-var map, placeService;
+// viewModel provides data binding using knockout
+var map;
 var viewModel = function() {
   var self = this;
   var bounds = new google.maps.LatLngBounds();
@@ -54,7 +54,7 @@ var viewModel = function() {
     }
   });
 
-  placeService = new google.maps.places.PlacesService(map);
+  var placeService = new google.maps.places.PlacesService(map);
 
   // whether search-list is visible through menu clickings
   this.menuVisible = ko.observable(true);
@@ -143,8 +143,12 @@ var viewModel = function() {
   };
 
   this.modalImages = ko.observableArray();
-  this.visibleImageId = ko.observable();
+  this.visibleImageId = ko.observable(0);
   this.currentImage = ko.observable();
+  // ko.computed(function() {
+  //   var id = self.visibleImageId();
+  //   return self.modalImages()[id];
+  // });
   // get google places photos
   function getPlaceDetails(placeId) {
     placeService.getDetails({placeId: placeId}, callback);
@@ -158,39 +162,51 @@ var viewModel = function() {
         });
       } else {
         // error handling
-        self.modalImages.push({imgVisible:true, imgSrc: "#",
+        self.modalImages.push({imgSrc: "#",
           imgAlt: "Failed to get Google photos. Click arrow for Flickr photos."});
         console.log("Google images can't be loaded.");
       }
-      self.visibleImageId = ko.observable(0);
+      // self.visibleImageId = ko.observable(0);
       self.currentImage(self.modalImages()[self.visibleImageId()]);
     }
   }
 
   // get flickr picture give lat/lon and title, max 10 photos
   function getFlickrPic(location, title) {
-    var flickrSearchUrl = "https://api.flickr.com/services/rest/?method=flickr.photos.search&api_key=144866a99011ed200e8ff4d6df0a7033&format=json&jsoncallback=?"
-      + "&lat=" + location.lat + "&lon=" + location.lng + "&tags=" + title + "&radius=1&per_page=10";
+    var flickrSearchUrl = "https://api.flickr.com/services/rest/"
+      + "?method=flickr.photos.search&api_key=144866a99011ed200e8ff4d6df0a7033"
+      + "&format=json&jsoncallback=?" + "&lat=" + location.lat + "&lon="
+      + location.lng + "&tags=" + title + "&radius=1&per_page=10";
     $.getJSON(flickrSearchUrl, function(data) {
       if (data.stat === 'ok') {
-        var imageUrl, contentString;
+        var imageUrl, flickrPhotoInfoUrl, originalImgSrc;
         data.photos.photo.forEach(function(photo) {
           if (photo.ispublic) {
-            imageUrl = "http://farm" + photo.farm + ".static.flickr.com/" +
-              photo.server + "/" + photo.id + "_" + photo.secret + ".jpg";
-            self.modalImages.push({imgSrc: imageUrl, imgAlt: ""});
+            // get photo info
+            flickrPhotoInfoUrl = "https://api.flickr.com/services/rest/"
+              + "?method=flickr.photos.getInfo&photo_id=" + photo.id
+              + "&api_key=144866a99011ed200e8ff4d6df0a7033&format=json&jsoncallback=?";
+            $.getJSON(flickrPhotoInfoUrl, function(data1) {
+              if (data1.stat === 'ok') {
+                imageUrl = "http://farm" + data1.photo.farm + ".static.flickr.com/" +
+                  data1.photo.server + "/" + data1.photo.id + "_" + data1.photo.secret + ".jpg";
+                originalImgSrc = data1.photo.urls.url[0]._content;
+                self.modalImages.push({imgSrc: imageUrl, imgAlt: data1.photo.title._content,
+                  originalImgSrc: originalImgSrc, linktext: "Link to Original Flickr Image"});
+              }
+            });
           }
         });
       } else {
         // error handling
-        self.modalImages.push({imgVisible:true, imgSrc: "#",
+        self.modalImages.push({imgSrc: "#",
           imgAlt: "Failed to get Flickr photos. Click arrow for Google photos."});
         console.log("Flickr images cant be loaded.");
       }
     })
     // error handling
     .fail(function() {
-      self.modalImages.push({imgVisible:true, imgSrc: "#",
+      self.modalImages.push({imgSrc: "#",
         imgAlt: "Failed to get Flickr photos. Click arrow for Google photos."});
     });
   }

@@ -29,8 +29,9 @@
         <div class="modal-image-container" data-bind="with: currentImage()">
           <span class="helper"></span>
           <img src="" data-bind="attr: {src: $data.imgSrc, alt:$data.imgAlt}"/>
+          <p><a href="" target="_blank" data-bind="text: $data.linktext, attr: {href: $data.originalImgSrc}"></a></p>
         </div>
-        <div class="btn-scroll">
+        <div class="btn-scroll"">
           <img class="arrow-left" data-bind="click: prevImage" src="images/arrow_left.svg" alt="button previous image">
           <img class="arrow-right" data-bind="click: nextImage" src="images/arrow_right.svg" alt="button next image">
         </div>
