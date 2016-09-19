@@ -219,6 +219,7 @@ var viewModel = function() {
     $.getJSON(flickrSearchUrl, function(data) {
       if (data.stat === 'ok') {
         var imageUrl, flickrPhotoInfoUrl, originalImgSrc;
+        var count = 0;
         data.photos.photo.forEach(function(photo) {
           if (photo.ispublic) {
             // url to get photo info
@@ -227,6 +228,8 @@ var viewModel = function() {
               "&api_key=144866a99011ed200e8ff4d6df0a7033&format=json&jsoncallback=?";
             // retrieve photo info
             $.getJSON(flickrPhotoInfoUrl, function(data1) {
+              // errors are ignored in the inner loop, we just want to show one error
+              // if not flickr photos are loaded at all.
               if (data1.stat === 'ok') {
                 // url to get image
                 imageUrl = "https://farm" + data1.photo.farm + ".static.flickr.com/" +
@@ -236,18 +239,24 @@ var viewModel = function() {
                 // push the image to modalImages observableArray
                 self.modalImages.push({imgSrc: imageUrl, imgAlt: data1.photo.title._content,
                   originalImgSrc: originalImgSrc, linktext: "Link to Original Flickr Image"});
+                count += 1;
               }
             });
           }
         });
+        // error handling for if no flickr images were obtained in the above loop
+        if (count === 0) {
+          self.modalImages.push({imgSrc: "#",
+            imgAlt: "Failed to get Flickr photos. Click arrow for Google photos."});
+        }
       } else {
-        // error handling
+        // error handling for if flickr api status is not ok.
         self.modalImages.push({imgSrc: "#",
           imgAlt: "Failed to get Flickr photos. Click arrow for Google photos."});
         console.log("Flickr images cant be loaded.");
       }
     })
-    // error handling
+    // error handling for when getJSON fails
     .fail(function() {
       self.modalImages.push({imgSrc: "#",
         imgAlt: "Failed to get Flickr photos. Click arrow for Google photos."});
