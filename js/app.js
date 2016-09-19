@@ -1,18 +1,25 @@
+// location model to hold data for each location
 var locationModel = function(loc) {
   var self = this;
 
+  // basic location information from locations.js
   this.location = loc.location;
   this.title = loc.title;
   this.placeId  = loc.placeId;
   this.description = loc.description;
   this.descriptionUrl = loc.link;
 
+  // whether a location (marker or list item) is visible
   this.visible = ko.observable(true);
+
+  // content for info-window
   var infoWindowContent = '<div class="infowindow-scroll"><h3>' +
     this.title + '</h3>' + '<p>' + this.description + '</p>' +
     '<a href="' + this.descriptionUrl + ' ">' + this.descriptionUrl + '</a>' +
     '<div><button class="btn-modal-image">'+
     ' Pictures from Google and Flickr</button></div></div>';
+
+  // marker for the location
   this.marker = new google.maps.Marker({
      map: map,
      position: self.location,
@@ -23,6 +30,9 @@ var locationModel = function(loc) {
      location: self.location,
      infoWindowContent: infoWindowContent
   });
+
+  // if a location is visible, show the corresponding marker on map
+  // otherwise hide the marker
   this.showMarker = ko.computed(function() {
     if (self.visible() === true) {
       self.marker.setMap(map);
@@ -54,15 +64,7 @@ var viewModel = function() {
     }
   });
 
-  var placeService = new google.maps.places.PlacesService(map);
-
-  // whether search-list is visible through menu clickings
-  this.menuVisible = ko.observable(true);
-  this.toggleSearchList = function() {
-    self.menuVisible(!self.menuVisible());
-  };
-
-  // read locations
+  // read locations and push into observableArray
   this.locations = ko.observableArray();
   neighborhood.locations.forEach(function(location) {
     self.locations.push(new locationModel(location));
@@ -78,7 +80,7 @@ var viewModel = function() {
           // bounce the marker upon click
           toggleBounce(this);
           // open infowindow
-          populateInfoWindow(this)
+          populateInfoWindow(this);
       });
     }
     bounds.extend(marker.position);
@@ -101,6 +103,56 @@ var viewModel = function() {
     });
   });
 
+  // whether search-list is visible through menu clickings
+  this.menuVisible = ko.observable(true);
+  this.toggleSearchList = function() {
+    self.menuVisible(!self.menuVisible());
+  };
+
+  // function to handle when a list item is clicked
+  this.listClick = function(clickedItem) {
+    var marker = clickedItem.marker;
+    map.setCenter(marker.getPosition());
+    map.setZoom(13);
+    toggleBounce(marker);
+    populateInfoWindow(marker);
+  };
+
+  // hide modal when close-button is clicked
+  this.modalVisible = ko.observable(false);
+  this.exitModal = function() {
+    $(".modal").hide();
+    // self.modalVisible(false);
+  };
+
+  this.modalImages = ko.observableArray();
+  this.visibleImageId = ko.observable(0);
+  this.currentImage = ko.observable();
+  // ?? why this doesn't work ??
+  // ko.computed(function() {
+  //   var id = self.visibleImageId();
+  //   return self.modalImages()[id];
+  // });
+
+  // handle left-arrow click event in modal
+  this.prevImage = function() {
+    self.visibleImageId = ko.computed(function() {
+      var length = self.modalImages().length;
+      var prev = (self.visibleImageId() - 1 + length) % length;
+      self.currentImage(self.modalImages()[prev]);
+      return prev;
+    });
+  }
+
+  // handle right-arrow click event in modal
+  this.nextImage = function() {
+    self.visibleImageId = ko.computed(function() {
+      var next = (self.visibleImageId() + 1) % self.modalImages().length;
+      self.currentImage(self.modalImages()[next]);
+      return next;
+    });
+  }
+
   // animation for marker when clicked, bounce only once (750ms)
   function toggleBounce(marker) {
     marker.setAnimation(google.maps.Animation.BOUNCE);
@@ -109,13 +161,8 @@ var viewModel = function() {
     }, 750);
   }
 
-  // // hide modal when close-button is clicked
-  this.modalVisible = ko.observable(false);
-  this.exitModal = function() {
-    $(".modal").hide();
-    // self.modalVisible(false);
-  };
-
+  // attach marker to infoWindow, set content and open infoWindow
+  // handle modal click event from infowindow
   function populateInfoWindow(marker) {
     self.infoWindow.marker = marker;
     self.infoWindow.setContent(marker.infoWindowContent);
@@ -133,23 +180,8 @@ var viewModel = function() {
     });
   }
 
-  // function to handle when a list item is clicked
-  this.listClick = function(clickedItem) {
-    var marker = clickedItem.marker;
-    map.setCenter(marker.getPosition());
-    map.setZoom(13);
-    toggleBounce(marker);
-    populateInfoWindow(marker);
-  };
-
-  this.modalImages = ko.observableArray();
-  this.visibleImageId = ko.observable(0);
-  this.currentImage = ko.observable();
-  // ko.computed(function() {
-  //   var id = self.visibleImageId();
-  //   return self.modalImages()[id];
-  // });
   // get google places photos
+  var placeService = new google.maps.places.PlacesService(map);
   function getPlaceDetails(placeId) {
     placeService.getDetails({placeId: placeId}, callback);
 
@@ -166,31 +198,38 @@ var viewModel = function() {
           imgAlt: "Failed to get Google photos. Click arrow for Flickr photos."});
         console.log("Google images can't be loaded.");
       }
-      // self.visibleImageId = ko.observable(0);
+      // set first image visible
       self.currentImage(self.modalImages()[self.visibleImageId()]);
     }
   }
 
   // get flickr picture give lat/lon and title, max 10 photos
   function getFlickrPic(location, title) {
+    // url to perform flickr photo searches
     var flickrSearchUrl = "https://api.flickr.com/services/rest/"
       + "?method=flickr.photos.search&api_key=144866a99011ed200e8ff4d6df0a7033"
       + "&format=json&jsoncallback=?" + "&lat=" + location.lat + "&lon="
       + location.lng + "&tags=" + title + "&radius=1&per_page=10";
+    // perform flickr photo searches
+    // for each photo, retrieve photo info
     $.getJSON(flickrSearchUrl, function(data) {
       if (data.stat === 'ok') {
         var imageUrl, flickrPhotoInfoUrl, originalImgSrc;
         data.photos.photo.forEach(function(photo) {
           if (photo.ispublic) {
-            // get photo info
+            // url to get photo info
             flickrPhotoInfoUrl = "https://api.flickr.com/services/rest/"
               + "?method=flickr.photos.getInfo&photo_id=" + photo.id
               + "&api_key=144866a99011ed200e8ff4d6df0a7033&format=json&jsoncallback=?";
+            // retrieve photo info
             $.getJSON(flickrPhotoInfoUrl, function(data1) {
               if (data1.stat === 'ok') {
+                // url to get image
                 imageUrl = "http://farm" + data1.photo.farm + ".static.flickr.com/" +
                   data1.photo.server + "/" + data1.photo.id + "_" + data1.photo.secret + ".jpg";
+                // url to link to the original post on flickr
                 originalImgSrc = data1.photo.urls.url[0]._content;
+                // push the image to modalImages observableArray
                 self.modalImages.push({imgSrc: imageUrl, imgAlt: data1.photo.title._content,
                   originalImgSrc: originalImgSrc, linktext: "Link to Original Flickr Image"});
               }
@@ -208,23 +247,6 @@ var viewModel = function() {
     .fail(function() {
       self.modalImages.push({imgSrc: "#",
         imgAlt: "Failed to get Flickr photos. Click arrow for Google photos."});
-    });
-  }
-
-  this.prevImage = function() {
-    self.visibleImageId = ko.computed(function() {
-      var length = self.modalImages().length;
-      var prev = (self.visibleImageId() - 1 + length) % length;
-      self.currentImage(self.modalImages()[prev]);
-      return prev;
-    });
-  }
-
-  this.nextImage = function() {
-    self.visibleImageId = ko.computed(function() {
-      var next = (self.visibleImageId() + 1) % self.modalImages().length;
-      self.currentImage(self.modalImages()[next]);
-      return next;
     });
   }
 };
