@@ -12,7 +12,8 @@ var locationModel = function(loc) {
   var infoWindowContent = '<div class="infowindow-scroll"><h3>' +
     this.title + '</h3>' + '<p>' + this.description + '</p>' +
     '<a href="' + this.descriptionUrl + ' ">' + this.descriptionUrl + '</a>' +
-    '<div><button class="btn-modal-image">Pictures from Google and Flickr</button></div></div>';
+    '<div><button class="btn-modal-image">'+
+    ' Pictures from Google and Flickr</button></div></div>';
   this.marker = new google.maps.Marker({
      map: map,
      position: self.location,
@@ -32,36 +33,7 @@ var locationModel = function(loc) {
   });
 };
 
-//
-// function populateInfoWindow(marker, infowindow) {
-//   // Check to make sure the infowindow is not already opened on this marker.
-//   if (infowindow.marker != marker) {
-//     infowindow.marker = marker;
-//     // set infowindow content
-//     var contentString = '<div class="infowindow-scroll"><h3>' + marker.title + '</h3>' +
-//       '<p>' + marker.description + '</p>' +
-//       '<a href="' + marker.descriptionSrc + ' ">' + marker.descriptionSrc + '</a>' +
-//       '<div><button class="btn-modal-image">Pictures from Google and Flickr</button></div></div>';
-//     infowindow.setContent(contentString);
-//     infowindow.open(map, marker);
-//     // Make sure the marker property is cleared if the infowindow is closed.
-//     infowindow.addListener('closeclick', function() {
-//       infowindow.marker = null;
-//     });
-//     // handle images button
-//     $(".btn-modal-image").click(function() {
-//       // when the button is clicked, removed images from last click
-//       $(".modal-image-container").empty();
-//       // get photos from google places api
-//       getPlaceDetails(marker.id);
-//       // get photos from flickr using lat/lon and title
-//       getFlickrPic(marker.location, marker.title);
-//       // show the modal
-//       $(".modal").show();
-//     });
-//   }
-// }
-
+var map, placeService;
 var viewModel = function() {
   var self = this;
   var bounds = new google.maps.LatLngBounds();
@@ -81,6 +53,8 @@ var viewModel = function() {
         position: google.maps.ControlPosition.RIGHT_BOTTOM
     }
   });
+
+  placeService = new google.maps.places.PlacesService(map);
 
   // whether search-list is visible through menu clickings
   this.menuVisible = ko.observable(true);
@@ -139,6 +113,17 @@ var viewModel = function() {
     self.infoWindow.marker = marker;
     self.infoWindow.setContent(marker.infoWindowContent);
     self.infoWindow.open(map, marker);
+    $(".btn-modal-image").click(function() {
+      // when the button is clicked, removed images from last click
+      $(".modal-image-container").empty();
+      // get photos from google places api
+      getPlaceDetails(marker.id);
+      // get photos from flickr using lat/lon and title
+      getFlickrPic(marker.location, marker.title);
+      // show the modal
+      // self.modalVisible(true);
+      $(".modal").show();
+    });
   }
 
   // function to handle when a list item is clicked
@@ -150,11 +135,16 @@ var viewModel = function() {
     populateInfoWindow(marker);
   };
 
-  // hide modal when close-button is clicked
-  this.modalVisible = ko.observable(false);
+  // // hide modal when close-button is clicked
+  // this.modalVisible = ko.observable(false);
   this.exitModal = function() {
-    self.modalVisible(false);
+    $(".modal").hide();
   };
+
+  // this.loadModal = function() {
+  //   self.modalVisible(true);
+  //   // self.modalImages.push('#');
+  // };
 };
 
 var initApp = function() {
@@ -167,114 +157,6 @@ var initApp = function() {
 var mapsErrorHandler = function() {
   $("#map").append("<div class='google-error'>Google Maps can't be loaded</div>");
 };
-
-var map, bounds, placeService;
-
-// var initMap = function() {
-//   // create a new map
-//   map = new google.maps.Map(document.getElementById('map'), {
-//     center: {lat: 37.609734, lng: -122.282254},
-//     zoom: 10,
-//     mapTypeControl: false,
-//     zoomControl: true,
-//     zoomControlOptions: {
-//         position: google.maps.ControlPosition.RIGHT_BOTTOM
-//     },
-//     scaleControl: true,
-//     streetViewControl: true,
-//     streetViewControlOptions: {
-//         position: google.maps.ControlPosition.RIGHT_BOTTOM
-//     }
-//   });
-//
-//   largeInfowindow = new google.maps.InfoWindow();
-//   bounds = new google.maps.LatLngBounds();
-//   placeService = new google.maps.places.PlacesService(map);
-//
-//   // create markers
-//   neighborhood.locations.forEach(function(location, i) {
-//     // Create a marker per location, and put into markers array.
-//     marker = new google.maps.Marker({
-//       //  map: map,
-//        position: location.location,
-//        title: location.title,
-//        animation: google.maps.Animation.DROP,
-//        icon: 'images/purple-marker-32.png',
-//        description: location.description,
-//        descriptionSrc: location.link,
-//        id: location.placeId,
-//        location: location.location
-//     });
-//     // Push the marker to our array of markers.
-//     model.markers.push(marker);
-//     // Create an onclick event to open an infowindow at each marker.
-//     marker.addListener('click', function() {
-//       // bounce the marker upon click
-//       toggleBounce(this);
-//       // open infowindow
-//       populateInfoWindow(this, largeInfowindow);
-//     });
-//     // extends the map bounds with current marker
-//     bounds.extend(marker.position);
-//   });
-//   // refit map bounds after completing markers
-//   map.fitBounds(bounds);
-//
-// };
-
-// function to handle when a list item is clicked
-// function ListClickHandler() {
-//   $('.loc-list').click(function() {
-//     // check the id of the list clicked
-//     var id = $(this).index();
-//     // center the map on this marker and zoom the map
-//     map.setCenter(filteredMarkers[id].getPosition());
-//     map.setZoom(13);
-//     //  bounce the marker when the list item is clicked
-//     toggleBounce(filteredMarkers[id]);
-//     // open infowindow when list item is clicked
-//     populateInfoWindow(filteredMarkers[id], largeInfowindow);
-//   });
-// }
-
-// event handler when a list item is clicked
-// ListClickHandler();
-//
-// function ListClickHandler() {
-//   $('.loc-list').click(function() {
-//     // check the id of the list clicked
-//     var id = $(this).index();
-//     // center the map on this marker and zoom the map
-//     map.setCenter(filteredMarkers[id].getPosition());
-//     map.setZoom(13);
-//     //  bounce the marker when the list item is clicked
-//     toggleBounce(filteredMarkers[id]);
-//     // open infowindow when list item is clicked
-//     populateInfoWindow(filteredMarkers[id], largeInfowindow);
-//   });
-// }
-
-// map.fitBounds(bounds);
-// filter markers when a search query is input
-// $(".form-control").keyup(function(event) {
-//   // get query text
-//   var query = $(".form-control").val().toLowerCase();
-//   // calculate filteredMarkers
-//   filteredMarkers = [];
-//   // for each marker, if its title matches query, remain on the map; otherwise remove from map
-//   model.markers().forEach(function(marker, i) {
-//     if (neighborhood.locations[i].title.toLowerCase().indexOf(query) >= 0) {
-//       marker.setMap(map);
-//       model.filteredMarkers.push(marker);
-//     } else {
-//       marker.setMap(null);
-//     }
-//   });
-//   // re-fit map bounds
-//   map.fitBounds(bounds);
-//   // re-initiate lists and the corresponding click events
-//   ListClickHandler();
-// });
 
 // get google places photos
 function getPlaceDetails(placeId) {

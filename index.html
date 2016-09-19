@@ -21,12 +21,13 @@
         </ul>
       </div>
     </div>
-    <div class="modal" data-bind="visible: modalVisible">
+    <div class="modal">
       <div class="modal-container">
         <div class="btn-exit-modal" data-bind="click: exitModal">
           <img src="images/close_icon.svg" alt="button close modal">
         </div>
-        <div class="modal-image-container">
+        <div class="modal-image-container" data-bind="foreach: modalImages">
+          <span class="helper"></span><img src="" data-bind="attr: {src: imgSrc}"/>
         </div>
         <div class="btn-scroll">
           <img class="arrow-left" src="images/arrow_left.svg" alt="button previous image">
