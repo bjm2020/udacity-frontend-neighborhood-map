@@ -12,13 +12,6 @@ var locationModel = function(loc) {
   // whether a location (marker or list item) is visible
   this.visible = ko.observable(true);
 
-  // content for info-window
-  var infoWindowContent = '<div class="infowindow-scroll"><h3>' +
-    this.title + '</h3>' + '<p>' + this.description + '</p>' +
-    '<a href="' + this.descriptionUrl + ' ">' + this.descriptionUrl + '</a>' +
-    '<div><button class="btn-modal-image">'+
-    ' Pictures from Google and Flickr</button></div></div>';
-
   // marker for the location
   this.marker = new google.maps.Marker({
      map: map,
@@ -28,7 +21,6 @@ var locationModel = function(loc) {
      icon: 'images/purple-marker-32.png',
      id: self.placeId,
      location: self.location,
-     infoWindowContent: infoWindowContent
   });
 
   // if a location is visible, show the corresponding marker on map
@@ -69,6 +61,8 @@ var viewModel = function() {
   neighborhood.locations.forEach(function(location) {
     self.locations.push(new locationModel(location));
   });
+  // currentLocation is used to keep track of the current location being
+  // shown on the map, and get modal images if the button in infowindow is clicked
   this.currentLocation = ko.observable(this.locations()[0]);
 
   // create only one infowindow for all markers
@@ -78,8 +72,9 @@ var viewModel = function() {
     if (self.infoWindow.marker != marker) {
       self.infoWindow.marker = marker;
       marker.addListener('click', function() {
-          // bounce the marker upon click
+          // update currentLocation when marker is clicked
           self.currentLocation(location);
+          // bounce the marker upon click
           toggleBounce(this);
           // open infowindow
           populateInfoWindow(this);
@@ -100,6 +95,8 @@ var viewModel = function() {
     map.fitBounds(bounds);
     return self.locations().filter(function(loc) {
       var result = loc.title.toLowerCase().indexOf(q) >= 0;
+      // if location contains query, then set marker visible;
+      // otherwise set marker not visible
       loc.visible(result);
       return result;
     });
@@ -113,6 +110,7 @@ var viewModel = function() {
 
   // function to handle when a list item is clicked
   this.listClick = function(clickedItem) {
+    // update currentLocation when list item is clicked
     self.currentLocation(clickedItem);
     var marker = clickedItem.marker;
     map.setCenter(marker.getPosition());
@@ -124,23 +122,11 @@ var viewModel = function() {
   // hide modal when close-button is clicked
   this.modalVisible = ko.observable(false);
   this.exitModal = function() {
-    // $(".modal").hide();
     self.modalVisible(false);
   };
 
-  this.showModal = function() {
-    // when the button is clicked, removed images from last click
-    self.modalImages.removeAll();
-    // get photos from google places api
-    var marker = self.currentLocation().marker;
-    getPlaceDetails(marker.id);
-    // get photos from flickr using lat/lon and title
-    getFlickrPic(marker.location, marker.title);
-    // show the modal
-    self.modalVisible(true);
-    // $(".modal").show();
-  };
-
+  // modalImages: array of images corresponding to the currentLocation
+  // using visibleImageId to select the currentImage to display
   this.modalImages = ko.observableArray();
   this.visibleImageId = ko.observable(0);
   this.currentImage = ko.observable();
@@ -183,17 +169,19 @@ var viewModel = function() {
     self.infoWindow.marker = marker;
     self.infoWindow.setContent($('.info-window-template').html());
     self.infoWindow.open(map, marker);
-    // $(".btn-modal-image").click(function() {
-    //   // when the button is clicked, removed images from last click
-    //   self.modalImages.removeAll();
-    //   // get photos from google places api
-    //   getPlaceDetails(marker.id);
-    //   // get photos from flickr using lat/lon and title
-    //   getFlickrPic(marker.location, marker.title);
-    //   // show the modal
-    //   // self.modalVisible(true);
-    //   $(".modal").show();
-    // });
+
+    // handle button click event inside infowindow
+    $('.btn-modal-image').click(function() {
+      // when the button is clicked, removed images from last click
+      self.modalImages.removeAll();
+      // var marker = self.currentLocation().marker;
+      // get photos from google places api
+      getPlaceDetails(marker.id);
+      // get photos from flickr using lat/lon and title
+      getFlickrPic(marker.location, marker.title);
+      // show the modal
+      self.modalVisible(true);
+    });
   }
 
   // get google places photos
