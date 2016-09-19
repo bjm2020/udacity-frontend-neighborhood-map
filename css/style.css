@@ -138,12 +138,12 @@ li:hover {
   margin: auto;
   max-height: 300px;
   vertical-align: middle;
-  display: none;
+  /*display: none;*/
 }
 
-.modal-image-container .active {
+/*.modal-image-container .active {
   display: inline-block;
-}
+}*/
 
 .btn-scroll img {
   width: 45px;

@@ -109,13 +109,20 @@ var viewModel = function() {
     }, 750);
   }
 
+  // // hide modal when close-button is clicked
+  this.modalVisible = ko.observable(false);
+  this.exitModal = function() {
+    $(".modal").hide();
+    // self.modalVisible(false);
+  };
+
   function populateInfoWindow(marker) {
     self.infoWindow.marker = marker;
     self.infoWindow.setContent(marker.infoWindowContent);
     self.infoWindow.open(map, marker);
     $(".btn-modal-image").click(function() {
       // when the button is clicked, removed images from last click
-      $(".modal-image-container").empty();
+      self.modalImages.removeAll();
       // get photos from google places api
       getPlaceDetails(marker.id);
       // get photos from flickr using lat/lon and title
@@ -135,16 +142,75 @@ var viewModel = function() {
     populateInfoWindow(marker);
   };
 
-  // // hide modal when close-button is clicked
-  // this.modalVisible = ko.observable(false);
-  this.exitModal = function() {
-    $(".modal").hide();
-  };
+  this.modalImages = ko.observableArray();
+  this.visibleImageId = ko.observable();
+  this.currentImage = ko.observable();
+  // get google places photos
+  function getPlaceDetails(placeId) {
+    placeService.getDetails({placeId: placeId}, callback);
 
-  // this.loadModal = function() {
-  //   self.modalVisible(true);
-  //   // self.modalImages.push('#');
-  // };
+    function callback(place, status) {
+      if (status == google.maps.places.PlacesServiceStatus.OK) {
+        var url, contentString;
+        place.photos.forEach(function(photo, i) {
+          url = photo.getUrl({'maxWidth': 400, 'maxHeight': 400});
+          self.modalImages.push({imgSrc: url, imgAlt: ""});
+        });
+      } else {
+        // error handling
+        self.modalImages.push({imgVisible:true, imgSrc: "#",
+          imgAlt: "Failed to get Google photos. Click arrow for Flickr photos."});
+        console.log("Google images can't be loaded.");
+      }
+      self.visibleImageId = ko.observable(0);
+      self.currentImage(self.modalImages()[self.visibleImageId()]);
+    }
+  }
+
+  // get flickr picture give lat/lon and title, max 10 photos
+  function getFlickrPic(location, title) {
+    var flickrSearchUrl = "https://api.flickr.com/services/rest/?method=flickr.photos.search&api_key=144866a99011ed200e8ff4d6df0a7033&format=json&jsoncallback=?"
+      + "&lat=" + location.lat + "&lon=" + location.lng + "&tags=" + title + "&radius=1&per_page=10";
+    $.getJSON(flickrSearchUrl, function(data) {
+      if (data.stat === 'ok') {
+        var imageUrl, contentString;
+        data.photos.photo.forEach(function(photo) {
+          if (photo.ispublic) {
+            imageUrl = "http://farm" + photo.farm + ".static.flickr.com/" +
+              photo.server + "/" + photo.id + "_" + photo.secret + ".jpg";
+            self.modalImages.push({imgSrc: imageUrl, imgAlt: ""});
+          }
+        });
+      } else {
+        // error handling
+        self.modalImages.push({imgVisible:true, imgSrc: "#",
+          imgAlt: "Failed to get Flickr photos. Click arrow for Google photos."});
+        console.log("Flickr images cant be loaded.");
+      }
+    })
+    // error handling
+    .fail(function() {
+      self.modalImages.push({imgVisible:true, imgSrc: "#",
+        imgAlt: "Failed to get Flickr photos. Click arrow for Google photos."});
+    });
+  }
+
+  this.prevImage = function() {
+    self.visibleImageId = ko.computed(function() {
+      var length = self.modalImages().length;
+      var prev = (self.visibleImageId() - 1 + length) % length;
+      self.currentImage(self.modalImages()[prev]);
+      return prev;
+    });
+  }
+
+  this.nextImage = function() {
+    self.visibleImageId = ko.computed(function() {
+      var next = (self.visibleImageId() + 1) % self.modalImages().length;
+      self.currentImage(self.modalImages()[next]);
+      return next;
+    });
+  }
 };
 
 var initApp = function() {
@@ -157,79 +223,3 @@ var initApp = function() {
 var mapsErrorHandler = function() {
   $("#map").append("<div class='google-error'>Google Maps can't be loaded</div>");
 };
-
-// get google places photos
-function getPlaceDetails(placeId) {
-  placeService.getDetails({placeId: placeId}, callback);
-
-  function callback(place, status) {
-    if (status == google.maps.places.PlacesServiceStatus.OK) {
-      var url, contentString;
-      place.photos.forEach(function(photo, i) {
-        url = photo.getUrl({'maxWidth': 400, 'maxHeight': 400});
-        if (i === 0) {
-          contentString = '<span class="helper"></span><img class="active" src=' + url +'>';
-        } else {
-          contentString = '<span class="helper"></span><img src=' + url +'>';
-        }
-        $(".modal-image-container").append(contentString);
-      });
-    } else {
-      // error handling
-      $(".modal-image-container").append('<span class="helper"></span><img class="active" src="#" alt="Failed to get Google photos. Click arrow for Flickr photos.">');
-      console.log("Google images can't be loaded.");
-    }
-  }
-}
-
-// get flickr picture give lat/lon and title, max 10 photos
-function getFlickrPic(location, title) {
-  var flickrSearchUrl = "https://api.flickr.com/services/rest/?method=flickr.photos.search&api_key=144866a99011ed200e8ff4d6df0a7033&format=json&jsoncallback=?"
-    + "&lat=" + location.lat + "&lon=" + location.lng + "&tags=" + title + "&radius=1&per_page=10";
-  $.getJSON(flickrSearchUrl, function(data) {
-    if (data.stat === 'ok') {
-      var imageUrl, contentString;
-      data.photos.photo.forEach(function(photo) {
-        if (photo.ispublic) {
-          imageUrl = "http://farm" + photo.farm + ".static.flickr.com/" +
-            photo.server + "/" + photo.id + "_" + photo.secret + ".jpg";
-          contentString = '<span class="helper"></span><img src=' + imageUrl +' alt=' + photo.title + '>';
-          $(".modal-image-container").append(contentString);
-        }
-      });
-    } else {
-      // error handling
-      $(".modal-image-container").append('<span class="helper"></span><img src="#" alt="Failed to get Flickr photos. Click arrow for Google photos.">');
-      console.log("Flickr images cant be loaded.");
-    }
-  })
-  // error handling
-  .fail(function() {
-    $(".modal-image-container").append('<span class="helper"></span><img src="#" alt="Failed to get Flickr photos. Click arrow for Google photos.">');
-  });
-}
-
-$(function () {
-  // move to the next image when arrow-right is clicked
-  var $next;
-  $(".arrow-right").click(function() {
-    $next = $(".modal-image-container img.active").removeClass('active').next().next();
-    if ($next.length) {
-      $next.addClass('active');
-    } else {
-      // if last image, jump to the first image
-      $(".modal-image-container img:first").addClass('active');
-    }
-  });
-
-  // move to the previous image when left-arrow is clicked
-  $(".arrow-left").click(function() {
-    $next = $(".modal-image-container img.active").removeClass('active').prev().prev();
-    if ($next.length) {
-      $next.addClass('active');
-    } else {
-      // if first image, then jump to the last image
-      $(".modal-image-container img:last").addClass('active');
-    }
-  });
-});

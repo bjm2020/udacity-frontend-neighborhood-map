@@ -21,11 +21,10 @@
   .modal-image-container img {
     position: relative;
     margin: auto;
-    max-width: 95vw;
+    max-width: 92vw;
     overflow: hidden;
     height: 250px;
-    display: none;
-  }
+    /*display: none;*/
 
 }
 
@@ -43,7 +42,7 @@
 
   .modal-image-container img {
     position: relative;
-    display: none;
+    /*display: none;*/
     margin: auto;
     max-width: 95vw;
     overflow: hidden;
