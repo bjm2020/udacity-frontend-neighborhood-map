@@ -137,6 +137,7 @@ li:hover {
 .modal-image-container img {
   margin: auto;
   max-height: 300px;
+  max-width: 95%;
   vertical-align: middle;
 }
 
