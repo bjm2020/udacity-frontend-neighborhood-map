@@ -113,6 +113,7 @@ var viewModel = function() {
 
   // function to handle when a list item is clicked
   this.listClick = function(clickedItem) {
+    self.currentLocation(clickedItem);
     var marker = clickedItem.marker;
     map.setCenter(marker.getPosition());
     map.setZoom(13);
