@@ -142,7 +142,7 @@ var viewModel = function() {
       self.currentImage(self.modalImages()[prev]);
       return prev;
     });
-  }
+  };
 
   // handle right-arrow click event in modal
   this.nextImage = function() {
@@ -151,7 +151,7 @@ var viewModel = function() {
       self.currentImage(self.modalImages()[next]);
       return next;
     });
-  }
+  };
 
   // animation for marker when clicked, bounce only once (750ms)
   function toggleBounce(marker) {
@@ -187,7 +187,7 @@ var viewModel = function() {
 
     function callback(place, status) {
       if (status == google.maps.places.PlacesServiceStatus.OK) {
-        var url, contentString;
+        var url;
         place.photos.forEach(function(photo, i) {
           url = photo.getUrl({'maxWidth': 400, 'maxHeight': 400});
           self.modalImages.push({imgSrc: url, imgAlt: ""});
@@ -206,10 +206,10 @@ var viewModel = function() {
   // get flickr picture give lat/lon and title, max 10 photos
   function getFlickrPic(location, title) {
     // url to perform flickr photo searches
-    var flickrSearchUrl = "https://api.flickr.com/services/rest/"
-      + "?method=flickr.photos.search&api_key=144866a99011ed200e8ff4d6df0a7033"
-      + "&format=json&jsoncallback=?" + "&lat=" + location.lat + "&lon="
-      + location.lng + "&tags=" + title + "&radius=1&per_page=10";
+    var flickrSearchUrl = "https://api.flickr.com/services/rest/" +
+      "?method=flickr.photos.search&api_key=144866a99011ed200e8ff4d6df0a7033" +
+      "&format=json&jsoncallback=?" + "&lat=" + location.lat + "&lon=" +
+      location.lng + "&tags=" + title + "&radius=1&per_page=10";
     // perform flickr photo searches
     // for each photo, retrieve photo info
     $.getJSON(flickrSearchUrl, function(data) {
@@ -218,9 +218,9 @@ var viewModel = function() {
         data.photos.photo.forEach(function(photo) {
           if (photo.ispublic) {
             // url to get photo info
-            flickrPhotoInfoUrl = "https://api.flickr.com/services/rest/"
-              + "?method=flickr.photos.getInfo&photo_id=" + photo.id
-              + "&api_key=144866a99011ed200e8ff4d6df0a7033&format=json&jsoncallback=?";
+            flickrPhotoInfoUrl = "https://api.flickr.com/services/rest/" +
+              "?method=flickr.photos.getInfo&photo_id=" + photo.id +
+              "&api_key=144866a99011ed200e8ff4d6df0a7033&format=json&jsoncallback=?";
             // retrieve photo info
             $.getJSON(flickrPhotoInfoUrl, function(data1) {
               if (data1.stat === 'ok') {

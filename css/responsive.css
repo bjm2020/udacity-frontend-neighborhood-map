@@ -24,8 +24,6 @@
     max-width: 92vw;
     overflow: hidden;
     height: 250px;
-    /*display: none;*/
-
 }
 
 @media screen and (max-width: 700px) and (orientation:landscape) {
@@ -42,11 +40,9 @@
 
   .modal-image-container img {
     position: relative;
-    /*display: none;*/
     margin: auto;
     max-width: 95vw;
     overflow: hidden;
     height: 70vh;
   }
-
 }
