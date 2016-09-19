@@ -45,7 +45,7 @@
         <p data-bind="text: $data.description"></p>
         <a data-bind="attr: {href: $data.descriptionUrl}, text: $data.descriptionUrl"></a>
         <div>
-          <button class="btn-modal-image">
+          <button class="btn-modal-image" data-bind="click: $parent.showModal">
             Pictures from Google and Flickr
           </button>
         </div>

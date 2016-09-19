@@ -169,20 +169,21 @@ var viewModel = function() {
     self.infoWindow.marker = marker;
     self.infoWindow.setContent($('.info-window-template').html());
     self.infoWindow.open(map, marker);
-
-    // handle button click event inside infowindow
-    $('.btn-modal-image').click(function() {
-      // when the button is clicked, removed images from last click
-      self.modalImages.removeAll();
-      // var marker = self.currentLocation().marker;
-      // get photos from google places api
-      getPlaceDetails(marker.id);
-      // get photos from flickr using lat/lon and title
-      getFlickrPic(marker.location, marker.title);
-      // show the modal
-      self.modalVisible(true);
-    });
   }
+
+  // handle button click event inside infowindow
+  this.showModal = function() {
+  // $('.btn-modal-image').click(function() {
+    // when the button is clicked, removed images from last click
+    self.modalImages.removeAll();
+    var marker = self.currentLocation().marker;
+    // get photos from google places api
+    getPlaceDetails(marker.id);
+    // get photos from flickr using lat/lon and title
+    getFlickrPic(marker.location, marker.title);
+    // show the modal
+    self.modalVisible(true);
+  };
 
   // get google places photos
   var placeService = new google.maps.places.PlacesService(map);
