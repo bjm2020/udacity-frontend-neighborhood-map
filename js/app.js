@@ -169,6 +169,8 @@ var viewModel = function() {
     self.infoWindow.marker = marker;
     self.infoWindow.setContent($('.info-window-template').html());
     self.infoWindow.open(map, marker);
+    ko.cleanNode($('.btn-modal-image')[0]); // remove previous button binding
+    ko.applyBindings(model, $('.btn-modal-image')[0]); // re-apply button binding
   }
 
   // handle button click event inside infowindow
@@ -220,7 +222,6 @@ var viewModel = function() {
     $.getJSON(flickrSearchUrl, function(data) {
       if (data.stat === 'ok') {
         var imageUrl, flickrPhotoInfoUrl, originalImgSrc;
-        var count = 0;
         data.photos.photo.forEach(function(photo) {
           if (photo.ispublic) {
             // url to get photo info
@@ -240,16 +241,10 @@ var viewModel = function() {
                 // push the image to modalImages observableArray
                 self.modalImages.push({imgSrc: imageUrl, imgAlt: data1.photo.title._content,
                   originalImgSrc: originalImgSrc, linktext: "Link to Original Flickr Image"});
-                count += 1;
               }
             });
           }
         });
-        // error handling for if no flickr images were obtained in the above loop
-        if (count === 0) {
-          self.modalImages.push({imgSrc: "#",
-            imgAlt: "Failed to get Flickr photos. Click arrow for Google photos."});
-        }
       } else {
         // error handling for if flickr api status is not ok.
         self.modalImages.push({imgSrc: "#",
@@ -265,9 +260,10 @@ var viewModel = function() {
   }
 };
 
+var model;
 var initApp = function() {
   // apply data bindings to viewModel
-  var model = new viewModel();
+  model = new viewModel();
   ko.applyBindings(model);
 };
 
