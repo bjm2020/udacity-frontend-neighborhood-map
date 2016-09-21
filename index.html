@@ -38,20 +38,6 @@
       </div>
     </div>
 
-    <!-- info-window-template, not shown by default -->
-    <div class="info-window-template" data-bind="with: currentLocation()" style="display: none;">
-      <div class="infowindow-scroll">
-        <h3 data-bind="text: $data.title"></h3>
-        <p data-bind="text: $data.description"></p>
-        <a data-bind="attr: {href: $data.descriptionUrl}, text: $data.descriptionUrl"></a>
-        <div>
-          <button class="btn-modal-image" data-bind="click: $root.showModal">
-            Pictures from Google and Flickr
-          </button>
-        </div>
-      </div>
-    </div>
-
     <script src="js/lib/knockout-3.4.0.js"></script>
     <script src="js/lib/jquery-3.1.0.min.js"></script>
     <script src="js/data/locations.js"></script>

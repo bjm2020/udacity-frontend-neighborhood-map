@@ -12,6 +12,12 @@ var locationModel = function(loc) {
   // whether a location (marker or list item) is visible
   this.visible = ko.observable(true);
 
+  var infoWindowContent = '<div class="infowindow-scroll"><h3>' +
+      this.title + '</h3>' + '<p>' + this.description + '</p>' +
+      '<a href="' + this.descriptionUrl + ' ">' + this.descriptionUrl + '</a>' +
+      '<div><button class="btn-modal-image" data-bind="click: $root.showModal">'+
+      ' Pictures from Google and Flickr</button></div></div>';
+
   // marker for the location
   this.marker = new google.maps.Marker({
      map: map,
@@ -21,6 +27,7 @@ var locationModel = function(loc) {
      icon: 'images/purple-marker-32.png',
      id: self.placeId,
      location: self.location,
+     infoWindowContent: infoWindowContent
   });
 
   // if a location is visible, show the corresponding marker on map
@@ -167,7 +174,7 @@ var viewModel = function() {
   // handle modal click event from infowindow
   function populateInfoWindow(marker) {
     self.infoWindow.marker = marker;
-    self.infoWindow.setContent($('.info-window-template').html());
+    self.infoWindow.setContent(marker.infoWindowContent);
     self.infoWindow.open(map, marker);
     ko.cleanNode($('.btn-modal-image')[0]); // remove previous button binding
     ko.applyBindings(model, $('.btn-modal-image')[0]); // re-apply button binding
